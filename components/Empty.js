@@ -1,15 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 
 export default function EmptyChat() {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState(null);
   const router = useRouter();
-  const user = JSON.parse(localStorage.getItem('user'));
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } else {
+        // Redirect to login if user is not found
+        router.push('/login');
+      }
+    }
+  }, [router]);
 
   const handleSend = async () => {
-    if (message.trim()) {
+    if (message.trim() && user) {
       setIsLoading(true);
       try {
         const response = await axios.post('https://dennislaw-xr6xja66ya-uk.a.run.app/query', { query: message });
